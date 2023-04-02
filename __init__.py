@@ -9,6 +9,7 @@ import torch
 import numpy as np
 import PIL
 from PIL import Image
+import server
 
 g_ClipTagger = "masterpiece best quality girl"
 
@@ -27,7 +28,7 @@ class ImageTaggerDD:
                 "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
                 }
 
-    RETURN_TYPES = ("TAGGER",)
+    RETURN_TYPES = ("STRING","ASCII")
     FUNCTION = "fetch_tagger"
 
     CATEGORY = "DD"
@@ -38,7 +39,7 @@ class ImageTaggerDD:
         print(tag)
         g_ClipTagger = tag
         ##res[0] = tag
-        return {0: tag}
+        return {0: tag, 1: tag, "ui": tag}
 
 
 #
@@ -47,7 +48,7 @@ class LoadImage_Tagger(LoadImage):
         self.type = "temp"
         pass
 
-    RETURN_TYPES = ("IMAGE", "TAGGER")
+    RETURN_TYPES = ("IMAGE", "STRING")
     # 重载=
     def load_image(self, image):
         ret = super().load_image(image)
@@ -75,17 +76,16 @@ class LoadImage_Tagger(LoadImage):
 class CLIPTextEncodeTaggerDD:
     @classmethod
     def INPUT_TYPES(s):
-        return {"required": {"text": ("STRING", {"default": g_ClipTagger, "multiline": True}),
-                             "tag": ("TAGGER", ),
+        return {"required": {"text": ("STRING", {"default": "", "multiline": True}),
+                             "tag": ("STRING", {"default": ""}),
                              "clip": ("CLIP", )}}
-    RETURN_TYPES = ("CONDITIONING",)
+    RETURN_TYPES = ("CONDITIONING","STRING")
     FUNCTION = "encode"
 
     CATEGORY = "conditioning"
 
     def encode(self, tag, clip, text):
-        text = tag if len(tag) > 0 else text
-        return ([[clip.encode(text), {}]], )
+        return {0:([clip.encode(tag + ' ' + text), {}], ), 1: tag + ' ' + text}
 
 
 
