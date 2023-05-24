@@ -8,6 +8,7 @@ import numpy as np
 
 #zzTODO: modelloader,
 from . import paths, deepbooru_model, devices, shared, images
+from .safe import load
 
 re_special = re.compile(r'([\\()])')
 
@@ -40,7 +41,7 @@ class DeepDanbooru:
         # )
 
         self.model = deepbooru_model.DeepDanbooruModel()
-        t = torch.load(file, map_location="cpu")
+        t = load(file, map_location="cpu")
         self.model.load_state_dict(t)
 
         self.model.eval()
